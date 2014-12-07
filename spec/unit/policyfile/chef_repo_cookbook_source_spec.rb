@@ -32,7 +32,10 @@ describe ChefDK::Policyfile::ChefRepoCookbookSource do
         "0.1.0"=>[],
       },
       "local-cookbook"=>{
-        "2.3.4"=>[["another-local-cookbook", "~> 0.1"]],
+        "2.3.4"=>[],
+      },
+      "cookbook-with-a-dep"=>{
+        "9.9.9"=>[["another-local-cookbook", "~> 0.1"]],
       },
       "noignore"=>{
         "0.1.0"=>[],
