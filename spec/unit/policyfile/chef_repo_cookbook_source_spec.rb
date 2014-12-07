@@ -48,7 +48,7 @@ describe ChefDK::Policyfile::ChefRepoCookbookSource do
   end
 
   it "generates location options for a cookbook from the given graph" do
-    expected_opts = { path: "/Users/lamont/oc/chef-dk/spec/unit/fixtures/local_path_cookbooks/local-cookbook", version: "2.3.4" }
+    expected_opts = { path: File.join(repo_path, "local-cookbook"), version: "2.3.4" }
     expect(cookbook_source.source_options_for("local-cookbook", "2.3.4")).to eq(expected_opts)
   end
 
