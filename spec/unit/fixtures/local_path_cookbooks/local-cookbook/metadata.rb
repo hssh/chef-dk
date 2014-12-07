@@ -6,3 +6,4 @@ description      'Installs/Configures local-cookbook'
 long_description 'Installs/Configures local-cookbook'
 version          '2.3.4'
 
+depends 'another-local-cookbook', '~> 0.1'
