@@ -33,7 +33,7 @@ module ChefDK
       end
 
       def ==(other)
-        other.kind_of?(self.class) && other.path = path
+        other.kind_of?(self.class) && other.path == path
       end
 
       def universe_graph
