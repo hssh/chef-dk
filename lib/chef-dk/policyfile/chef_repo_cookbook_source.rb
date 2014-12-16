@@ -16,10 +16,9 @@
 #
 
 require 'chef-dk/exceptions'
-require 'chef-dk/cookbook_metadata'
+require 'chef/cookbook_loader'
+require 'chef/cookbook/file_system_file_vendor'
 require 'chef-dk/ui'
-require 'chef/util/path_helper'
-require 'chef/json_compat'
 
 module ChefDK
   module Policyfile
@@ -54,30 +53,27 @@ module ChefDK
       end
 
       def slurp_metadata!
-          begin
-            @universe_graph = {}
-            @cookbook_version_paths = {}
-            Dir.glob(File.join(Chef::Util::PathHelper.escape_glob(path), '*')).each do |cookbook|
-              next unless File.directory?(cookbook)
-              next if cookbook == '.' || cookbook == '..'
-              metadata = CookbookMetadata.new
-              metadata_rb = File.join(cookbook, 'metadata.rb')
-              metadata_json = File.join(cookbook, 'metadata.json')
-              if File.exist?(metadata_json)
-                data = Chef::JSONCompat.parse(IO.read(metadata_json))
-                metadata.from_hash(data['metadata'])
-              elsif File.exist?(metadata_rb)
-                metadata.from_file(metadata_rb)
-              else
-                ui.err("WARN: found cookbook in chef-repo with no metadata: #{File.basename(cookbook)}, skipping")
-                next
-              end
-              @universe_graph[metadata.cookbook_name] ||= {}
-              @universe_graph[metadata.cookbook_name][metadata.version] = metadata.dependencies.to_a
-              @cookbook_version_paths[metadata.cookbook_name] ||= {}
-              @cookbook_version_paths[metadata.cookbook_name][metadata.version] = cookbook
-            end
+        @universe_graph = {}
+        @cookbook_version_paths = {}
+        cookbook_repo.load_cookbooks
+        cookbook_repo.each do |cookbook_name, cookbook_version|
+          metadata = cookbook_version.metadata
+          if metadata.name.nil?
+            ui.err("WARN: #{cookbook_name} cookbook missing metadata or no name field, skipping")
+            next
           end
+          @universe_graph[metadata.name] ||= {}
+          @universe_graph[metadata.name][metadata.version] = metadata.dependencies.to_a
+          @cookbook_version_paths[metadata.name] ||= {}
+          @cookbook_version_paths[metadata.name][metadata.version] = cookbook_version.root_dir
+        end
+      end
+
+      def cookbook_repo
+        @cookbook_repo ||= begin
+          Chef::Cookbook::FileVendor.fetch_from_disk(path)
+          Chef::CookbookLoader.new(path)
+        end
       end
 
     end
