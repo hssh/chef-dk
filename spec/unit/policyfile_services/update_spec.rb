@@ -48,6 +48,8 @@ describe "ChefDK::PolicyfileServices::Update" do
 
         it "does not update the cookbook"
 
+        it "explains why dependency conflicts prevented the update"
+
       end
 
       context "and the cookbook has deps that are not shared with other cookbooks" do
